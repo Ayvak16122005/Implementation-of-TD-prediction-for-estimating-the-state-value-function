@@ -54,19 +54,90 @@ V(S) = V(S) + \alpha \times TD\ Error
 
 ```python
 
+# ============================================================
+# TD PREDICTION FOR ESTIMATING STATE-VALUE FUNCTION
+# ============================================================
+
+import gym
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import defaultdict
+
+# Create Environment
+env = gym.make("FrozenLake-v1", is_slippery=False)
+
+# Parameters
+alpha = 0.1
+gamma = 0.9
+episodes = 5000
+
+# State Value Function
+V = defaultdict(float)
+
+# Random Policy
+def policy(state):
+    return env.action_space.sample()
+
+# TD Prediction Algorithm
+for ep in range(episodes):
+
+    state, _ = env.reset()
+
+    done = False
+
+    while not done:
+
+        action = policy(state)
+
+        next_state, reward, terminated, truncated, _ = env.step(action)
+
+        done = terminated or truncated
+
+        # TD Target
+        td_target = reward + gamma * V[next_state]
+
+        # TD Error
+        td_error = td_target - V[state]
+
+        # Update State Value
+        V[state] = V[state] + alpha * td_error
+
+        state = next_state
+
+# Print State Values
+print("\nTD State Value Function:\n")
+
+for s in range(env.observation_space.n):
+    print(f"State {s}: {V[s]:.4f}")
+
+# ------------------------------------------------
+# Histogram Plot
+# ------------------------------------------------
+
+states = list(range(env.observation_space.n))
+values = [V[s] for s in states]
+
+plt.figure(figsize=(10,5))
+
+plt.bar(states, values)
+
+plt.xlabel("States")
+plt.ylabel("Estimated State Value")
+plt.title("TD Prediction State Value Function")
+
+plt.show()
+
+
 ```
 
----
+
 
 ## Output
 
-```text
-
-```
-
----
+<img width="905" height="301" alt="image" src="https://github.com/user-attachments/assets/dbaf845d-6b91-4194-843b-cd695eb91a54" />
 
 ## Output Graph
+<img width="852" height="423" alt="image" src="https://github.com/user-attachments/assets/6e62add6-33e0-4a98-a1f7-689def6118d8" />
 
 The histogram displays the estimated state-value function for all states in the FrozenLake environment after TD learning.
 
